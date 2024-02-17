@@ -1,0 +1,159 @@
+alias: Graduated Room Lights
+sequence:
+  - variables:
+      settings: |-
+        {# Build a graduated room #}
+
+        {%- macro h_complementary(c) -%}
+          {{- ((c + 180) % 360) | round(3) -}}
+        {%- endmacro -%}
+
+        {%- macro h_random_analogous(c) -%}
+          {{- ((c + ([-30, 30] | random)) % 360) | round(3) -}}
+        {%- endmacro -%}
+
+        {%- macro h_random_analogous_close(c) -%}
+          {{- ((c + ([-15, 15] | random)) % 360) | round(3) -}}
+        {%- endmacro -%}
+
+        {%- macro h_random_analogous_subtle(c) -%}
+          {{- ((c + ([-7.5, 7.5] | random)) % 360) | round(3) -}}
+        {%- endmacro -%}
+
+        {%- macro h_random_triadic(c) -%}
+          {{- ((c + 120 * ([1, 2] | random)) % 360) | round(3) -}}
+        {%- endmacro -%}
+
+        {%- macro h_random_tetradic(c) -%}
+          {{- ((c + 90 * ([1, 2, 3] | random)) % 360) | round(3) -}}
+        {%- endmacro -%}
+
+        {%- macro h_select_alt(h_mode,c) -%}
+          {%- if h_mode == "complementary" -%}
+            {{- h_complementary(c)|float -}}
+          {%- elif h_mode == "analogous" -%}
+            {{- h_random_analogous(c)|float -}}
+          {%- elif h_mode == "close" -%}
+            {{- h_random_analogous_close(c)|float -}}
+          {%- elif h_mode == "subtle" -%}
+            {{- h_random_analogous_subtle(c)|float -}}
+          {%- elif h_mode == "triadic" -%}
+            {{- h_random_triadic(c)|float -}}
+          {%- elif h_mode == "tetradic" -%}
+            {{- h_random_tetradic(c)|float -}}
+          {%- elif h_mode == "random" -%}
+            {{- pick_hue()|float -}}
+          {%- else -%}
+            {{- c -}}
+          {%- endif -%}
+        {%- endmacro -%}
+
+        {%- macro pick_hue() -%}
+        {{- (range(0,36000) | random) / 100 -}}
+        {%- endmacro -%}
+
+        {%- macro pick_sat() -%}
+        {{- (range(4000,10000) | random) / 100 -}}
+        {%- endmacro -%}
+
+        {%- macro pick_br() -%}
+        {{- (range(20000,25500) | random) / 100 -}}
+        {%- endmacro -%}
+
+        {%- macro next_hue() -%}
+        {{ c_set.hue }}
+        {%- set c_set.hue = ((c_set.hue + steps.hue) % 360) -%}
+        {%- endmacro -%}
+
+        {%- macro next_sat() -%}
+        {{ c_set.sat }}
+        {%- set c_set.sat = (c_set.sat + steps.sat) -%}
+        {%- endmacro -%}
+
+        {%- macro next_br() -%}
+        {{ c_set.br }}
+        {%- set c_set.br = (c_set.br + steps.br) -%}
+        {%- endmacro -%}
+
+        {%- macro pick_hs(lights) -%}
+        {%- for light in lights -%}
+          "{{- light -}}": {"state":"on","hs_color": [ {{- next_hue()|round(3) -}}, {{- next_sat()|round(3) -}} ],"brightness": {{- next_br()|round(3) -}}},
+        {%- endfor -%}
+        {%- endmacro -%}
+
+        {%- macro breakdown_group(group) -%}
+          {%- if state_attr(group, 'is_hue_group') -%}
+            {%- set entities = state_attr(group, 'lights') | map('lower') | map('regex_replace', '^(.*)', 'light.\\1') -%}
+          {%- elif state_attr(group, 'entity_id') is not none -%}
+            {%- set entities = state_attr(group, 'entity_id') | map('lower') | list -%}
+          {%- else -%}
+            {%- set entities = expand(group) | map(attribute='entity_id') | map('lower') -%}
+          {%- endif -%}
+          {{- entities | unique | join(',') -}}
+        {%- endmacro -%}
+
+        {%- macro lights(list) -%}
+          {%- set t = namespace(lights = []) -%}
+          {%- if list is string -%}
+            {%- set list = list.split(',') -%}
+          {%- endif -%}
+          {%- for l in list -%}
+            {%- set t.lights = t.lights + breakdown_group(l).split(',') -%}
+          {%- endfor -%}
+          {{- t.lights | unique | join(',') -}}
+        {%- endmacro -%}
+
+        {%- macro get_lights(include, exclude) -%}
+          {{- lights(include).split(',') | reject('in', lights(exclude).split(',')) | unique | join(',') -}}
+        {%- endmacro -%}
+
+        {%- macro moded_vector(s,f,t,m) -%}
+        {%- set x_tf = (t-f)|abs -%}
+        {%- set x_mtf = m - x_tf -%}
+        {%- if x_tf <= (m/2) -%}
+          {%- set x_d = 1 if f<t else -1 -%}
+        {%- else -%}
+          {%- set x_d = -1 if f<t else 1 -%}
+        {%- endif -%}
+        {%- set x_d = x_d if s else (x_d * -1) -%}
+        {{ ([x_tf, x_mtf]|min)*x_d }}
+        {%- endmacro -%}
+
+        {%- set hue_mode = hue_mode if hue_mode is defined else "close" -%}
+        {%- set f_hue = from.hue|float if 
+          from is defined and from.hue is defined 
+          and from.hue != "random" else pick_hue()|float -%}
+        {%- set f_sat = from.saturation|float if 
+          from is defined and from.saturation is defined 
+          and from.saturation != "random" else pick_sat()|float -%}
+        {%- set t_hue = to.hue|float if 
+          to is defined and to.hue is defined 
+          and to.hue != "random" else h_select_alt(hue_mode,f_hue)|float -%}
+        {%- set t_sat = to.saturation|float if 
+          to is defined and to.saturation is defined
+          and to.saturation != "random" else pick_sat()|float -%}
+        {%- set f_br = from.brightness|float if 
+          from is defined and from.brightness is defined 
+          and from.brightness != "random" else pick_br()|float -%}
+        {%- set t_br = to.brightness|float if 
+          to is defined and to.brightness is defined
+          and to.brightness != "random" else pick_br()|float -%}
+        {%- set hue_shortest = hue_shortest if 
+          hue_shortest is defined else true -%}
+        {%- set steps = namespace(count=0,hue=0,sat=0,br=0) -%}
+        {%- set c_set = namespace(hue=f_hue,sat=f_sat,br=f_br) -%}
+        {%- set exclude = exclude if exclude is defined else [] -%}
+        {%- set lights = (get_lights(room,exclude)).split(',') -%}
+        {%- set steps.count = (lights|length) - 1 -%}
+        {%- set steps.hue = moded_vector(hue_shortest,f_hue,t_hue,360)|float /
+        steps.count -%}
+        {%- set steps.sat = (t_sat - f_sat) / steps.count -%}
+        {%- set steps.br = (t_br - f_br) / steps.count -%}
+        {{- ("{" + pick_hs(lights)[:-1] + "}") | from_json -}}
+  - service: scene.apply
+    data: >-
+      { {% if transition is defined %}"transition": {{ transition }},{% endif
+      %}"entities": {{ settings }} }
+mode: parallel
+icon: mdi:palette-outline
+max: 10
