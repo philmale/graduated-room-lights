@@ -108,15 +108,18 @@ sequence:
         {%- endmacro -%}
 
         {%- macro moded_vector(s,f,t,m) -%}
-        {%- set x_tf = (t-f)|abs -%}
-        {%- set x_mtf = m - x_tf -%}
-        {%- if x_tf <= (m/2) -%}
-          {%- set x_d = 1 if f<t else -1 -%}
-        {%- else -%}
-          {%- set x_d = -1 if f<t else 1 -%}
-        {%- endif -%}
-        {%- set x_d = x_d if s else (x_d * -1) -%}
-        {{ ([x_tf, x_mtf]|min)*x_d }}
+          {%- set r = ((f-t)+360)%360*-1 -%}
+          {%- set l = ((t-f)+360)%360 -%}
+          {%- if s -%}
+            {%- set d = [r|abs,l|abs]|min -%}
+          {%- else -%}
+            {%- set d = [r|abs,l|abs]|max -%}
+          {%- endif -%}
+          {%- if d == r|abs -%}
+            {{ r }}
+          {%- else -%}
+            {{ l }}
+          {%- endif -%}
         {%- endmacro -%}
 
         {%- set hue_mode = hue_mode if hue_mode is defined else "close" -%}
