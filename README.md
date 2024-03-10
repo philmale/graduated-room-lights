@@ -7,7 +7,7 @@ Script to set a graduated transition from one colour to another across a group o
 Looks great in rooms where there are several Hue ceiling spots, but will work across any number of lights in any group. 
 ## Example
 An example of how to call it.
-A script to colour from one random colour to another across a room with four ceiling lamps and two floor lamps, with the lights specifically named so they are turned on in that order, you could also just put in light.front_hall (or whatever your room group is - but the lights may not then appear in a specific order - depends on how they are registered in your setup - I prefer to specifically name the light bulbs in the right order).
+A script to colour from one random colour to another across a room with four ceiling lamps and two floor lamps, with the lights specifically named so they are turned on in that order, you could also just put in light.front_hall (or whatever your room group is - but the lights may not then appear in a specific order).
 
 ```
 alias: Front Hall Rainbow
