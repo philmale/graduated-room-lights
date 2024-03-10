@@ -23,9 +23,11 @@ sequence:
         - light.fhlpl
       hue_mode: complementary
       from:
+        hue: 0
         saturation: random
         brightness: 255
       to:
+        hue: 240
         saturation: random
         brightness: 255
       hue_shortest: false
