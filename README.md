@@ -36,6 +36,8 @@ mode: restart
 icon: mdi:palette-outline
 ```
 
+If you don't specify from or to hue or saturation the script will pick random values, so by not specifying the from.hue or the to.hue settings you'll get a random rainbow every time from one colour to another.
+
 The hue_shortest parameter tells the script to pick the shortest path between two points on the colour wheel to create the graduation or not (so any two points on the wheel will have a short route between them or a long route around the wheel between them - this tells the algorithm which way to go!).
 
 You can also pass an exclude parameter that is a comma separated list of lights to exclude from the calculation - so if you have a room with a several lights in it and you want to exclude two of them you can set room to light.room_name and exclude to (say) light.light_3, light.light_4
