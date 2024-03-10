@@ -1,4 +1,8 @@
 ## graduated-room-lights
+
+![Example Roof](https://github.com/philmale/graduated-room-lights/blob/main/graduatedLights.jpg?raw=true)
+
+
 Script to set a graduated transition from one colour to another across a group of Philips Hue lights (should work with any light that can understand HS parameters for colour), you can specify a light group or a list of explicit lights to transition the colours across, set the starting and/or ending hue, saturation and brightness - if anything is missing an appropriate random value will be selected - and you can choose a number of different ways of stepping across the HS colour space (complementary, analogous, close, subtle, triadic, tetradic, random).
 Looks great in rooms where there are several Hue ceiling spots, but will work across any number of lights in any group. 
 ## Example
@@ -35,8 +39,6 @@ The hue_shortest parameter tells the script to pick the shortest path between tw
 You can also pass an exclude parameter that is a comma separated list of lights to exclude from the calculation - so if you have a room with a several lights in it and you want to exclude two of them you can set room to light.room_name and exclude to (say) light.light_3, light.light_4
 
 The transition parameter will set the transition to that many seconds, so in my example above it takes two seconds to colour the room.
-
-![Example Roof](https://github.com/philmale/graduated-room-lights/blob/main/graduatedLights.jpg?raw=true)
 
 ## Try It
 If you want to play with this logic, here is a chunk of code you can copy and paste into the HA template editor to mess around with the script parameters and see how it all works, the script is tagged on the end here so you can just lift this code directly into the template editor:
