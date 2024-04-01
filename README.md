@@ -1,6 +1,7 @@
 ## graduated-room-lights
 
-![Example Roof](https://github.com/philmale/graduated-room-lights/blob/main/graduatedLights.jpg?raw=true)
+
+![graduatedLights](https://github.com/philmale/graduated-room-lights/assets/8235259/f853b1e8-2790-4cf1-be37-c943f17d8423)
 
 
 Home Assistant script to set a graduated transition from one colour to another across a group of Philips Hue lights (should work with any light that can understand HS parameters for colour), you can specify a light group or a list of explicit lights to transition the colours across, set the starting and/or ending hue, saturation and brightness - if anything is missing an appropriate random value will be selected - and you can choose a number of different ways of stepping across the HS colour space (complementary, analogous, close, subtle, triadic, tetradic, random).
